@@ -1,0 +1,27 @@
+﻿# Operating System & Editor Files
+.DS_Store
+Thumbs.db
+*.tmp
+*.log
+.vscode/
+.idea/
+
+# Internal Development & Roadmap Documentation
+ARCHITECTURE.md
+CONTEXT.md
+docs/
+
+# Build Packages & Distribution
+dist/
+*.zip
+*.crx
+
+# Internal Asset & Generator Scripts
+generate_icons.js
+generate_store_assets.py
+scripts/generate_store_assets.py
+icons/generate_icons.js
+
+# Dependencies / Environment (if any)
+node_modules/
+.env*

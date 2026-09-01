@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>oaDub - Gemini Live Simültane Çeviri</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Header -->
+    <header class="app-header">
+      <div class="brand">
+        <div class="logo-wrapper">
+          <svg class="logo-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14.5v-9l6 4.5-6 4.5z" fill="url(#brandGrad)"/>
+            <path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z" fill="#38bdf8" opacity="0.8"/>
+            <defs>
+              <linearGradient id="brandGrad" x1="2" y1="2" x2="22" y2="22" gradientUnits="userSpaceOnUse">
+                <stop stop-color="#38bdf8" />
+                <stop offset="1" stop-color="#818cf8" />
+              </linearGradient>
+            </defs>
+          </svg>
+        </div>
+        <div class="brand-text">
+          <div class="brand-title-row">
+            <span class="brand-title">oaDub</span>
+            <span class="brand-badge">LIVE</span>
+          </div>
+          <span class="brand-subtitle">Simültane Ses Dublajı</span>
+        </div>
+      </div>
+
+      <div class="status-indicator-badge idle" id="statusBadge">
+        <span class="status-dot"></span>
+        <span class="status-text" id="statusText">Hazır</span>
+      </div>
+    </header>
+
+    <!-- Tab Navigation Bar -->
+    <nav class="tab-nav">
+      <button type="button" class="tab-btn active" id="tabDubbingBtn" data-tab="dubbing">
+        <svg class="tab-btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+          <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+          <line x1="12" y1="19" x2="12" y2="23"></line>
+          <line x1="8" y1="23" x2="16" y2="23"></line>
+        </svg>
+        <span>Dublaj</span>
+      </button>
+      <button type="button" class="tab-btn" id="tabSettingsBtn" data-tab="settings">
+        <svg class="tab-btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="3"></circle>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+        </svg>
+        <span>Ayarlar</span>
+      </button>
+    </nav>
+
+    <!-- TAB 1: DUBLAJ (ANA EKRAN) -->
+    <div class="tab-pane active" id="paneDubbing">
+      <!-- Active Tab Banner -->
+      <div class="card active-tab-card" id="tabCard">
+        <div class="tab-icon-wrapper">
+          <img id="tabFavicon" class="tab-favicon" src="../icons/icon16.png" alt="Favicon">
+        </div>
+        <div class="tab-info">
+          <div class="tab-header-row">
+            <span class="tab-label">Sekme</span>
+            <span class="capture-mode-tag tab-mode" id="captureModeTag" title="Ses Yakalama Yöntemi">Sekme Sesi</span>
+          </div>
+          <span class="tab-title" id="tabTitle">Sekme yükleniyor...</span>
+        </div>
+      </div>
+
+      <!-- Muted Media Alert Banner (Compact Modern Notification) -->
+      <div class="warning-banner hidden" id="mutedWarningBanner">
+        <div class="warning-banner-inner">
+          <div class="warning-left">
+            <svg class="warning-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+              <line x1="23" y1="9" x2="17" y2="15"></line>
+              <line x1="17" y1="9" x2="23" y2="15"></line>
+            </svg>
+            <span class="warning-text">Video Sessizde (Muted)</span>
+          </div>
+          <button type="button" class="btn-unmute-mini" id="unmuteMediaBtn" title="Videonun Sesini Aç">
+            <span>Sesi Aç 🔊</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Audio Mixer Section -->
+      <div class="card mixer-card">
+        <div class="mixer-slider-group">
+          <div class="mixer-label-row">
+            <span class="mixer-label">
+              <svg class="mixer-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+              </svg>
+              Orijinal Ses
+            </span>
+            <span class="mixer-value" id="originalVolLabel">20%</span>
+          </div>
+          <input type="range" id="originalVolSlider" min="0" max="100" value="20" class="custom-range" />
+        </div>
+
+        <div class="mixer-slider-group">
+          <div class="mixer-label-row">
+            <span class="mixer-label accent-label">
+              <svg class="mixer-icon accent-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+                <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                <line x1="12" y1="19" x2="12" y2="23"></line>
+                <line x1="8" y1="23" x2="16" y2="23"></line>
+              </svg>
+              Çeviri Dublaj Sesi
+            </span>
+            <span class="mixer-value accent-value" id="translatedVolLabel">100%</span>
+          </div>
+          <input type="range" id="translatedVolSlider" min="0" max="100" value="100" class="custom-range custom-range-accent" />
+        </div>
+      </div>
+
+      <!-- Main Action Button -->
+      <div class="action-wrapper">
+        <button type="button" id="toggleTranslateBtn" class="btn-primary">
+          <div class="btn-content">
+            <svg class="btn-icon play-icon" viewBox="0 0 24 24" fill="currentColor">
+              <polygon points="5 3 19 12 5 21 5 3"></polygon>
+            </svg>
+            <svg class="btn-icon stop-icon hidden" viewBox="0 0 24 24" fill="currentColor">
+              <rect x="6" y="6" width="12" height="12" rx="2"></rect>
+            </svg>
+            <span id="btnText">Simültane Çeviriyi Başlat</span>
+          </div>
+          <div class="btn-glow"></div>
+        </button>
+      </div>
+
+      <!-- Live Transcript / Subtitle Panel -->
+      <div class="card transcript-card">
+        <div class="card-header-compact">
+          <div class="transcript-header-left">
+            <span class="card-title">Canlı Transkript</span>
+            <div class="pulse-recording hidden" id="pulseRecording">
+              <span class="pulse-circle"></span>
+              <span>CANLI</span>
+            </div>
+            <span class="record-duration-badge hidden" id="recordedDurationBadge" title="Kaydedilen Dublaj Süresi">00:00</span>
+          </div>
+          <div class="transcript-actions">
+            <button type="button" class="mini-btn download-btn" id="downloadAudioBtn" title="Canlı Dublaj Sesini İndir (.wav)">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="7 10 12 15 17 10"></polyline>
+                <line x1="12" y1="15" x2="12" y2="3"></line>
+              </svg>
+              <span>Ses (.wav)</span>
+            </button>
+            <button type="button" class="mini-btn download-btn" id="downloadSrtBtn" title="Zaman Damgalı Altyazı İndir (.srt)">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="7 10 12 15 17 10"></polyline>
+                <line x1="12" y1="15" x2="12" y2="3"></line>
+              </svg>
+              <span>.srt</span>
+            </button>
+            <button type="button" class="mini-btn download-btn" id="downloadVttBtn" title="Web Video Altyazısı İndir (.vtt)">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="7 10 12 15 17 10"></polyline>
+                <line x1="12" y1="15" x2="12" y2="3"></line>
+              </svg>
+              <span>.vtt</span>
+            </button>
+            <button type="button" class="mini-btn download-btn" id="downloadTranscriptBtn" title="Düz Transkript Metnini İndir (.txt)">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+                <line x1="16" y1="13" x2="8" y2="13"></line>
+                <line x1="16" y1="17" x2="8" y2="17"></line>
+                <polyline points="10 9 9 9 8 9"></polyline>
+              </svg>
+              <span>.txt</span>
+            </button>
+            <button type="button" class="mini-btn" id="copyTranscriptBtn" title="Metni Kopyala">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+              </svg>
+            </button>
+            <button type="button" class="mini-btn" id="clearTranscriptBtn" title="Temizle">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="3 6 5 6 21 6"></polyline>
+                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="transcript-body" id="transcriptContainer">
+          <div class="transcript-placeholder" id="transcriptPlaceholder">
+            <p>Çeviri başladığında gerçek zamanlı metin akışı burada görünecektir.</p>
+          </div>
+          <div class="transcript-stream hidden" id="transcriptStream"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 2: AYARLAR (SETTINGS) -->
+    <div class="tab-pane hidden" id="paneSettings">
+      <!-- API Key Section -->
+      <div class="card settings-card">
+        <div class="card-header-compact">
+          <span class="card-title">Gemini API Anahtarı</span>
+          <span class="key-saved-tag" id="keySavedTag">Kaydedildi</span>
+        </div>
+        <div class="input-with-icon">
+          <input type="password" id="apiKeyInput" placeholder="AQ... veya AIzaSy..." spellcheck="false" autocomplete="off" />
+          <button type="button" class="icon-button" id="toggleApiKeyBtn" title="Göster / Gizle">
+            <svg class="eye-icon" id="eyeIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+              <circle cx="12" cy="12" r="3"></circle>
+            </svg>
+          </button>
+        </div>
+        <div id="apiKeyTypeBadge" class="key-type-badge hidden"></div>
+
+        <!-- API Key Guide Collapsible -->
+        <div class="api-guide-box">
+          <button type="button" class="btn-guide-toggle" id="toggleGuideBtn">
+            <span class="guide-title">
+              <svg class="guide-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"></circle>
+                <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+                <line x1="12" y1="17" x2="12.01" y2="17"></line>
+              </svg>
+              Ücretsiz API Key Nasıl Alınır?
+            </span>
+            <svg class="chevron-icon" id="guideChevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </button>
+          <div class="guide-content hidden" id="guideContent">
+            <ol class="guide-steps">
+              <li><strong>1.</strong> Google AI Studio'ya gidin.</li>
+              <li><strong>2.</strong> Google hesabınızla giriş yapın.</li>
+              <li><strong>3.</strong> <strong>"Create API key"</strong> butonuna tıklayın.</li>
+              <li><strong>4.</strong> Oluşturulan anahtarı kopyalayıp yukarıdaki kutuya yapıştırın.</li>
+            </ol>
+            <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" class="btn-ai-studio">
+              <span>Google AI Studio'ya Git ↗</span>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Target Language Card -->
+      <div class="card settings-card">
+        <div class="form-group">
+          <label for="targetLanguageSelect" class="settings-label">Hedef Dil (Çeviri Dili)</label>
+          <div class="select-wrapper">
+            <select id="targetLanguageSelect">
+              <option value="tr" selected>🇹🇷 Türkçe</option>
+              <option value="en">🇬🇧 English</option>
+              <option value="de">🇩🇪 Deutsch</option>
+              <option value="es">🇪🇸 Español</option>
+              <option value="fr">🇫🇷 Français</option>
+              <option value="it">🇮🇹 Italiano</option>
+              <option value="ja">🇯🇵 日本語</option>
+              <option value="ru">🇷🇺 Русский</option>
+              <option value="zh">🇨🇳 中文</option>
+              <option value="ar">🇸🇦 العربية</option>
+              <option value="pt">🇵🇹 Português</option>
+              <option value="nl">🇳🇱 Nederlands</option>
+              <option value="ko">🇰🇷 한국어</option>
+              <option value="hi">🇮🇳 हिन्दी</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Floating Widget Toggle Card (Default: Disabled) -->
+      <div class="card toggle-card">
+        <div class="toggle-info">
+          <svg class="toggle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+            <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+            <line x1="12" y1="19" x2="12" y2="23"></line>
+            <line x1="8" y1="23" x2="16" y2="23"></line>
+          </svg>
+          <div class="toggle-texts">
+            <span class="toggle-title">Sayfa İçi Yüzen Buton</span>
+            <span class="toggle-desc">Sayfada sürüklenebilir mini hub göster</span>
+          </div>
+        </div>
+        <label class="switch">
+          <input type="checkbox" id="showFloatingWidgetToggle">
+          <span class="slider round"></span>
+        </label>
+      </div>
+
+      <!-- Site Visibility Control Card -->
+      <div class="card site-control-card" id="siteControlCard">
+        <div class="site-control-info">
+          <div class="site-control-header">
+            <span class="site-control-title">Site Görünürlüğü</span>
+            <span class="domain-badge" id="currentDomainBadge">Yükleniyor...</span>
+          </div>
+          <span class="site-control-desc" id="siteControlDesc">Bu sitede yüzen butonu kontrol et</span>
+        </div>
+        <button type="button" class="btn-site-toggle" id="toggleSiteVisibilityBtn" title="Bu sitede yüzen butonu gizle / göster">
+          <span id="toggleSiteVisibilityText">Bu Sitede Gizle</span>
+        </button>
+      </div>
+
+      <!-- Keyboard Shortcuts Card -->
+      <div class="card shortcuts-card">
+        <div class="shortcuts-header">
+          <svg class="shortcuts-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="2" y="4" width="20" height="16" rx="2"></rect>
+            <path d="M6 8h.001M10 8h.001M14 8h.001M18 8h.001M8 12h.001M12 12h.001M16 12h.001M7 16h10"></path>
+          </svg>
+          <span>Klavye Kısayolları</span>
+        </div>
+        <div class="shortcut-item">
+          <span class="shortcut-desc">Çeviriyi Başlat / Durdur</span>
+          <span class="kbd-badge">Alt + Shift + D</span>
+        </div>
+        <span class="shortcuts-note">💡 Kısayolu değiştirmek için tarayıcınızın <code>chrome://extensions/shortcuts</code> veya <code>edge://extensions/shortcuts</code> sayfasına gidebilirsiniz.</span>
+      </div>
+    </div>
+
+    <!-- Error Banner -->
+    <div class="error-banner hidden" id="errorBanner">
+      <svg class="error-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="10"></circle>
+        <line x1="12" y1="8" x2="12" y2="12"></line>
+        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+      </svg>
+      <span class="error-msg" id="errorMessage">Hata mesajı</span>
+    </div>
+
+    <footer class="app-footer">
+      <div class="footer-top">
+        <span>oaDub • Gemini 3.5 Live</span>
+        <span class="footer-dot">•</span>
+        <a href="https://onuraksoy.com.tr" target="_blank" rel="noopener noreferrer" class="footer-author">Onur AKSOY</a>
+      </div>
+      <div class="social-links">
+        <a href="https://onuraksoy.com.tr" target="_blank" rel="noopener noreferrer" class="social-icon" title="Web Sitesi (onuraksoy.com.tr)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="2" y1="12" x2="22" y2="12"></line>
+            <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1 4-10z"></path>
+          </svg>
+        </a>
+        <a href="https://x.com/ooanuraksoy" target="_blank" rel="noopener noreferrer" class="social-icon" title="X (Twitter) @ooanuraksoy">
+          <svg viewBox="0 0 24 24" fill="currentColor">
+            <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+          </svg>
+        </a>
+        <a href="https://instagram.com/ooanuraksoy" target="_blank" rel="noopener noreferrer" class="social-icon" title="Instagram @ooanuraksoy">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+            <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+            <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
+          </svg>
+        </a>
+        <a href="https://linkedin.com/in/ooanuraksoy" target="_blank" rel="noopener noreferrer" class="social-icon" title="LinkedIn @ooanuraksoy">
+          <svg viewBox="0 0 24 24" fill="currentColor">
+            <path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.28 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.75M6.46 10.9v8.37H9.2V10.9H6.46M7.83 6.45a1.65 1.65 0 1 0 0 3.3 1.65 1.65 0 0 0 0-3.3z"/>
+          </svg>
+        </a>
+        <a href="https://youtube.com/@ooanuraksoy" target="_blank" rel="noopener noreferrer" class="social-icon" title="YouTube @ooanuraksoy">
+          <svg viewBox="0 0 24 24" fill="currentColor">
+            <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+          </svg>
+        </a>
+      </div>
+    </footer>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

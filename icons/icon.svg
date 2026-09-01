@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0f172a"/>
+      <stop offset="100%" stop-color="#1e1b4b"/>
+    </linearGradient>
+    <linearGradient id="cyanPurple" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38bdf8"/>
+      <stop offset="50%" stop-color="#818cf8"/>
+      <stop offset="100%" stop-color="#c084fc"/>
+    </linearGradient>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="4" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+  </defs>
+
+  <!-- Background Base -->
+  <rect width="128" height="128" rx="28" fill="url(#bgGrad)"/>
+  <rect width="126" height="126" x="1" y="1" rx="27" fill="none" stroke="rgba(56, 189, 248, 0.3)" stroke-width="2"/>
+
+  <!-- Audio Wave Bars / Speech & Translation Motif -->
+  <g filter="url(#glow)">
+    <!-- Speech / Sound Waves -->
+    <rect x="28" y="52" width="8" height="24" rx="4" fill="url(#cyanPurple)"/>
+    <rect x="42" y="38" width="8" height="52" rx="4" fill="url(#cyanPurple)"/>
+    <rect x="56" y="26" width="8" height="76" rx="4" fill="url(#cyanPurple)"/>
+    <rect x="70" y="44" width="8" height="40" rx="4" fill="url(#cyanPurple)"/>
+    <rect x="84" y="32" width="8" height="64" rx="4" fill="url(#cyanPurple)"/>
+    <rect x="98" y="54" width="8" height="20" rx="4" fill="url(#cyanPurple)"/>
+  </g>
+
+  <!-- Center Live Dot -->
+  <circle cx="64" cy="108" r="4" fill="#38bdf8"/>
+</svg>

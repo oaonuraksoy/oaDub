@@ -1,0 +1,54 @@
+{
+  "manifest_version": 3,
+  "name": "oaDub - Gemini Live Simültane Çeviri",
+  "version": "1.0.2",
+  "author": "Onur AKSOY <dev@onuraksoy.com.tr>",
+  "homepage_url": "https://onuraksoy.com.tr",
+  "description": "Gemini Live API (Gemini 3.5 Live) ile sekme sesini gerçek zamanlı simültane çeviren ve seslendiren eklenti",
+  "permissions": [
+    "tabCapture",
+    "offscreen",
+    "storage",
+    "activeTab",
+    "tabs",
+    "scripting"
+  ],
+  "host_permissions": [
+    "<all_urls>",
+    "wss://generativelanguage.googleapis.com/*",
+    "https://generativelanguage.googleapis.com/*"
+  ],
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["scripts/content_script.js"],
+      "all_frames": true,
+      "run_at": "document_idle"
+    }
+  ],
+  "action": {
+    "default_popup": "popup/popup.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "background": {
+    "service_worker": "background/service_worker.js"
+  },
+  "commands": {
+    "toggle-translation": {
+      "suggested_key": {
+        "default": "Alt+Shift+D",
+        "mac": "Alt+Shift+D"
+      },
+      "description": "Simültane çeviriyi başlat / durdur"
+    }
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  }
+}
