@@ -218,23 +218,35 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
           let chosenMode = 'tab';
           let streamId = null;
 
-          // 1. Determine environment capabilities (Desktop tabCapture vs Mobile/SPA DOM capture)
+          // 1. Determine environment capabilities: prioritize tabCapture (low-latency native audio)
+          console.log(`[oaDub] Starting translation session for tab ID: ${tabId}`);
           if (hasTabCaptureSupport()) {
             try {
+              console.log(`[oaDub] Requesting tabCapture media stream for tab ID: ${tabId}...`);
               streamId = await chrome.tabCapture.getMediaStreamId({
                 targetTabId: tabId
               });
+              if (streamId) {
+                chosenMode = 'tab';
+                console.log(`[oaDub] tabCapture streamId successfully acquired. Active mode: 'tab'`);
+              } else {
+                console.warn('[oaDub] tabCapture returned empty streamId. Falling back to DOM Media Capture mode.');
+                chosenMode = 'dom';
+              }
             } catch (err) {
-              console.warn('oaDub: tabCapture.getMediaStreamId failed, switching to DOM Media Capture mode:', err);
+              console.warn('[oaDub] tabCapture.getMediaStreamId failed, falling back to DOM Media Capture mode:', err);
               chosenMode = 'dom';
             }
           } else {
+            console.log('[oaDub] tabCapture API not available in current environment. Using DOM Media Capture mode.');
             chosenMode = 'dom';
           }
 
-          if (!streamId) {
+          if (!streamId && chosenMode === 'tab') {
             chosenMode = 'dom';
           }
+
+          console.log(`[oaDub] Capture mode selected: ${chosenMode} (streamId: ${streamId ? 'provided' : 'none'})`);
 
           // Update local state
           state.captureMode = chosenMode;
@@ -252,7 +264,9 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
           // 2. Setup Offscreen Audio Processor & WebSocket (if offscreen supported)
           if (hasOffscreenSupport()) {
+            console.log('[oaDub] Preparing offscreen document for audio pipeline and Gemini WebSocket...');
             await createOffscreenDocument();
+            console.log('[oaDub] Sending START_RECORDING to offscreen document with captureMode:', chosenMode);
             await chrome.runtime.sendMessage({
               action: 'START_RECORDING',
               captureMode: chosenMode,
@@ -263,18 +277,21 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
               tabOriginalVolume: state.tabOriginalVolume,
               translatedVolume: state.translatedVolume
             });
+          } else {
+            console.warn('[oaDub] Offscreen API not supported in this browser.');
           }
 
           // 3. If DOM capture mode, trigger content script capture
           if (chosenMode === 'dom') {
             try {
+              console.log('[oaDub] Triggering START_DOM_CAPTURE on content script for tab ID:', tabId);
               await sendToContentScript(tabId, {
                 action: 'START_DOM_CAPTURE',
                 tabOriginalVolume: state.tabOriginalVolume,
                 translatedVolume: state.translatedVolume
               });
             } catch (domErr) {
-              console.warn('oaDub: Could not initialize DOM capture on tab:', domErr);
+              console.warn('[oaDub] Could not initialize DOM capture on tab:', domErr);
             }
           }
 

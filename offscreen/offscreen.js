@@ -19,7 +19,7 @@ let nextPlayTime = 0;
 let pcmBufferAccumulator = [];
 let recordedChunks = []; // Accumulated 24kHz 16-bit Mono PCM chunks for live audio recording
 const TARGET_SAMPLE_RATE = 16000;
-const ACCUMULATOR_TARGET_SAMPLES = 3200; // ~200ms chunks at 16kHz
+const ACCUMULATOR_TARGET_SAMPLES = 1600; // 100ms chunks at 16kHz
 
 // Message listener for control commands
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
@@ -155,7 +155,9 @@ async function startRecording(config) {
         console.warn('oaDub offscreen: Tab audio track ended. Continuing session.');
       };
 
-      captureAudioContext = new (window.AudioContext || window.webkitAudioContext)();
+      captureAudioContext = new (window.AudioContext || window.webkitAudioContext)({
+        sampleRate: 16000
+      });
       if (captureAudioContext.state === 'suspended') {
         await captureAudioContext.resume();
       }
@@ -171,7 +173,7 @@ async function startRecording(config) {
 
       // Audio Processor (Resampling to 16kHz 16-bit Mono PCM)
       const inputSampleRate = captureAudioContext.sampleRate;
-      const bufferSize = 4096;
+      const bufferSize = 1024;
       processorNode = captureAudioContext.createScriptProcessor(bufferSize, 1, 1);
       pcmBufferAccumulator = [];
 
@@ -222,26 +224,8 @@ function initWebSocket(config) {
     let setupSent = false;
 
     webSocket.onopen = () => {
-      // Send initial Setup Frame
-      const langMap = {
-        'tr': 'Turkish',
-        'en': 'English',
-        'de': 'German',
-        'es': 'Spanish',
-        'fr': 'French',
-        'it': 'Italian',
-        'ja': 'Japanese',
-        'ko': 'Korean',
-        'ru': 'Russian',
-        'ar': 'Arabic',
-        'pt': 'Portuguese',
-        'nl': 'Dutch',
-        'pl': 'Polish',
-        'zh': 'Chinese',
-        'hi': 'Hindi'
-      };
+      // Send initial Setup Frame (Gemini 3.5 Live Translate API)
       const targetLangCode = config.targetLanguage || 'tr';
-      const targetLangName = langMap[targetLangCode] || targetLangCode;
 
       const setupMessage = {
         setup: {
@@ -254,15 +238,20 @@ function initWebSocket(config) {
                   voiceName: 'Puck'
                 }
               }
+            },
+            translationConfig: {
+              targetLanguageCode: targetLangCode,
+              echoTargetLanguage: true
             }
           },
-          systemInstruction: {
-            parts: [
-              {
-                text: `You are a professional simultaneous interpreter and voice dubber. Translate spoken speech from the incoming audio stream into natural, fluent, grammatically cohesive ${targetLangName} (${targetLangCode}) sentences and phrases. Speak smoothly with natural human pacing and intonation. Do not translate word-by-word or speak broken word fragments. Deliver clear, coherent, meaningful dubbed phrases. Speak ONLY the translated speech.`
-              }
-            ]
-          }
+          contextWindowCompression: {
+            triggerTokens: 25600,
+            slidingWindow: {
+              targetTokens: 12800
+            }
+          },
+          inputAudioTranscription: {},
+          outputAudioTranscription: {}
         }
       };
 
@@ -385,9 +374,6 @@ function handleServerMessage(response) {
     }
 
     if (serverContent.turnComplete) {
-      if (playbackAudioContext) {
-        nextPlayTime = playbackAudioContext.currentTime;
-      }
       notifyStatus('connected');
     }
   }
@@ -450,9 +436,9 @@ function playAudioChunk(base64Data) {
 
   const currentTime = playbackAudioContext.currentTime;
   if (nextPlayTime < currentTime) {
-    nextPlayTime = currentTime;
-  } else if (nextPlayTime > currentTime + 1.2) {
-    nextPlayTime = currentTime + 0.1;
+    nextPlayTime = currentTime + 0.03;
+  } else if (nextPlayTime > currentTime + 0.35) {
+    nextPlayTime = currentTime + 0.05;
   }
   const startTime = nextPlayTime;
   source.start(startTime);

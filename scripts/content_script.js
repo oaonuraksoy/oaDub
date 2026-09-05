@@ -17,7 +17,7 @@
 
   // Configuration & Constants
   const TARGET_SAMPLE_RATE = 16000;
-  const ACCUMULATOR_TARGET_SAMPLES = 3200; // ~200ms chunks at 16kHz
+  const ACCUMULATOR_TARGET_SAMPLES = 1600; // 100ms chunks at 16kHz
 
   // Internal Audio Capture State
   let isCapturing = false;
@@ -292,7 +292,7 @@
     passThroughGain.connect(captureAudioContext.destination);
 
     // 3. Setup ScriptProcessorNode for 16kHz PCM streaming
-    const bufferSize = 4096;
+    const bufferSize = 1024;
     scriptProcessor = captureAudioContext.createScriptProcessor(bufferSize, 1, 1);
     const inputSampleRate = captureAudioContext.sampleRate;
 
@@ -452,9 +452,9 @@
 
     const currentTime = playbackAudioContext.currentTime;
     if (nextPlayTime < currentTime) {
-      nextPlayTime = currentTime;
-    } else if (nextPlayTime > currentTime + 1.2) {
-      nextPlayTime = currentTime + 0.1;
+      nextPlayTime = currentTime + 0.03;
+    } else if (nextPlayTime > currentTime + 0.35) {
+      nextPlayTime = currentTime + 0.05;
     }
 
     const startTime = nextPlayTime;

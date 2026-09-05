@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "oaDub - Gemini Live Simültane Çeviri",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "author": "Onur AKSOY <dev@onuraksoy.com.tr>",
   "homepage_url": "https://onuraksoy.com.tr",
   "description": "Gemini Live API (Gemini 3.5 Live) ile sekme sesini gerçek zamanlı simültane çeviren ve seslendiren eklenti",
